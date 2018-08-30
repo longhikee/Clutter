@@ -1,0 +1,2 @@
+kill pid: equal kill -15 pid >>> kill the related process and then kill the pocess of this pid
+kill -9 pid >>> kill the process ignore everything

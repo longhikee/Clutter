@@ -1,2 +1,1 @@
-# Clutter
-small testing programs
+This repository is for small testing programs
