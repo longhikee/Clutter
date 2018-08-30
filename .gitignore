@@ -3,4 +3,5 @@
 *.result
 *.jar
 *.class
-
+*.exe
+*.o
