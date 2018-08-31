@@ -1,0 +1,12 @@
+input file 1.8G
+
+without -O
+real    0m53.542s
+user    0m0.000s
+sys     0m0.031s
+
+with -O3 or -O2 or -O1
+real    0m28.809s
+user    0m0.000s
+sys     0m0.031s
+
