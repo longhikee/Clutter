@@ -20,6 +20,7 @@ public:
   ~Crypt(){};
 
   void init(const string& in, const string& out);
+  bool crypt(const char* inStr, size_t size, char* outStream);
   bool crypt(const string& inStr, string& outStr);
   bool file_handle();
 
@@ -35,7 +36,9 @@ private:
   string m_out_path;
 
 
+  bool crypt_deep(const char* inStream, const size_t& size, char* outStream);
   bool crypt_deep(const string& inStr, string& outStr);
+  bool crypt_quick(const char* inStream, const size_t& size, char* outStream);
   bool crypt_quick(const string& inStr, string& outStr);
 
   void process_infile(const string& input);

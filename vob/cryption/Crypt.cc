@@ -26,6 +26,21 @@ void Crypt::set_key(const char& key)
   m_key = key;
 }
 
+bool Crypt::crypt(const char* inStream, const size_t& size, char* outStream)
+{
+  if (deep == m_mode)
+  {
+    return crypt_deep(inStream, size, outStream);
+  }
+  else if (quick == m_mode)
+  {
+    return crypt_quick(inStream, size, outStream);
+  }
+
+  TRC_ERR("invalid mode" << m_mode);
+  return false;
+}
+
 bool Crypt::crypt(const string& inStr, string& outStr)
 {
   if (deep == m_mode)
@@ -41,6 +56,16 @@ bool Crypt::crypt(const string& inStr, string& outStr)
   return false;
 }
 
+bool Crypt::crypt_deep(const char* inStream, const size_t& size, char* outStream)
+{
+  for (size_t i = 0; i < size ; i++)
+  {
+    outStream[i] = inStream[i] ^ m_key;
+  }
+
+  return true;
+}
+
 bool Crypt::crypt_deep(const string& inStr, string& outStr)
 {
   size_t len = inStr.size();
@@ -51,6 +76,12 @@ bool Crypt::crypt_deep(const string& inStr, string& outStr)
   }
 
   return true;
+}
+
+bool Crypt::crypt_quick(const char* inStream, const size_t& size, char* outStream)
+{
+  cout << "to do" << endl;
+  return false;
 }
 
 bool Crypt::crypt_quick(const string& inStr, string& outStr)
@@ -130,7 +161,6 @@ bool Crypt::file_handle()
     fileOut = m_out_path + m_out_file;
   }
 
-  string inStr, outStr;
   ifstream inFile(fileIn, ios::binary);
 
   if(inFile)
@@ -139,35 +169,36 @@ bool Crypt::file_handle()
     size_t length = inFile.tellg();
     inFile.seekg(0, inFile.beg);
 
-    char* buffer = 0;
     if (length < MAX_BLOCK)
     {
       char* buffer = new char[length];
+      char* outStream = new char[length];
       inFile.read(buffer, length);
       inFile.close();
 
-      inStr.resize(length);
-      memcpy((char*)inStr.c_str(), buffer, length);
-
-      crypt(inStr, outStr);
+      crypt(buffer, length, outStream);
 
       ofstream outFile(fileOut, ios::binary);
       if(outFile)
       {
-        outFile << outStr;
+        outFile.write(outStream, length);
         TRC_INFO("create out file: " << fileOut);
         outFile.close();
       }
       else
       {
         TRC_ERR("create file "<< fileOut << " failed");
+        delete [] buffer;
+	delete [] outStream;
         return false;
       }
+      delete [] buffer;
+      delete [] outStream;
     }
     else
     {
       char* buffer = new char[MAX_BLOCK];
-      inStr.resize(MAX_BLOCK);
+      char* outStream = new char[MAX_BLOCK];
       ofstream outFile(fileOut, ios::binary);
       if (outFile){
       while(true)
@@ -176,20 +207,15 @@ bool Crypt::file_handle()
 	{
           length -= MAX_BLOCK;
 	  inFile.read(buffer, MAX_BLOCK);
-	  memcpy((char*)inStr.c_str(), buffer, MAX_BLOCK);
-	  crypt(inStr, outStr);
-	  outFile << outStr;
+          crypt(buffer, MAX_BLOCK, outStream);
+	  outFile.write(outStream, MAX_BLOCK);
         }
 	else
 	{
 	  inFile.read(buffer, length);
 	  inFile.close();
-	  inStr.clear();
-	  inStr.resize(length);
-	  memcpy((char*)inStr.c_str(), buffer, length);
-	  crypt(inStr, outStr);
-	  outFile << outStr;
-
+          crypt(buffer, length, outStream);
+	  outFile.write(outStream, length);
           break;
 	}
       }
@@ -197,13 +223,12 @@ bool Crypt::file_handle()
     else
     {
       TRC_ERR("create file "<< fileOut << "failed");
+      delete [] buffer;
+      delete [] outStream;
       return false;
     }
-    }
-
-    if (buffer)
-    {
-      delete [] buffer;
+    delete [] buffer;
+    delete [] outStream;
     }
 
     inFile.close();
