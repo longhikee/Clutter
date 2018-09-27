@@ -7,7 +7,7 @@ def callback():
 #b = Button(master, text='click', command=callback)
 #b = Button(master, text='disable', state=DISABLED)
 #b = Button(master, text='size', state=DISABLED, padx=59, pady=99)
-b = Button(master, text='size', state=DISABLED, bg='yellow', fg='red', font=("Helvetica", 16))
+b = Button(master, text='size', width=6, height=2, bd=4, state=DISABLED, bg='yellow', fg='red', font=("Helvetica", 16))
 
 '''
 f = Frame(master, height=320, width=320)
