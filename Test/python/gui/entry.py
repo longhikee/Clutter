@@ -1,6 +1,6 @@
 from tkinter import *
 root = Tk()
-Entry(root, text='input your text here').pack()
+Entry(root, text='in variable').pack()
 
 txt = StringVar()
 txt.set('input your text here')
@@ -9,6 +9,7 @@ e = Entry(root, textvariable=txt)
 
 e.pack()
 e['state'] = 'readonly'
+#e['state'] = 'normal'
 
 for mask in ['*','#','$']:
     e = StringVar()
