@@ -154,7 +154,7 @@ class Ascii:
     #middle
     self.var_M = StringVar()
     self.frm_M = Frame(self.frm)
-    Label(self.frm_M, text = 'Oct', font=('Arial', 12)).pack()
+    Label(self.frm_M, text = 'Dec', font=('Arial', 12)).pack()
     self.e_M = Entry(self.frm_M, textvariable=self.var_M, width=5, font=('Verdana', 15))
 
     #right
