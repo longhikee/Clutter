@@ -74,7 +74,7 @@ int main(int argc, char** argv)
   }
 
   srand(seed);
-  long int sig = random();
+  long int sig = random(); //Function name is rand() on windows
   cout << sig << endl;
 
   return 0;
