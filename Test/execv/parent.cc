@@ -23,10 +23,18 @@ int main()
     cout << "parent pid: " << getpid() << endl;
 sleep(10);
     pid_t pid = -1;
+    int status;
     if ((pid = waitpid(-1, NULL, WNOHANG)) > 0);  //WNOHANG waitpid will not hang just return 0
       cout << "waitpid WNOHANG return " << pid << " line: " <<  __LINE__ << endl;
-    if ((pid = waitpid(-1, NULL, NULL)) > 0)  //child pid won't be zombie when it exit
+    if ((pid = waitpid(-1, &status, NULL)) > 0)  //child pid won't be zombie when it exit
+    {
       cout << "pid: " << pid << " return." << "line:" << __LINE__ << endl;
+      if (WIFEXITED(status) || WEXITSTATUS(status))
+        cout << "process with pid" << pid << "exit with code " << WEXITSTATUS(status) << endl;
+      if (WIFSIGNALED(status))
+        cout << "process with pid" << pid << "terminate by signal " << WTERMSIG(status) << endl;
+    }
+
     cout << "parent begin to sleep 10s" << endl;
     sleep(10);
     cout << "parent exit" << endl;
