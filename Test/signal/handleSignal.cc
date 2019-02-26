@@ -34,6 +34,11 @@ void signal_handler(int sig)
 
 void signal_handler_init()
 {
+  sigset_t sigSet;
+  sigaddset(&sigSet, SIGABRT);
+  sigaddset(&sigSet, SIGSEGV);
+  sigaddset(&sigSet, SIGBUS);
+
   struct sigaction sa;
   sigset_t mask;
   sigfillset(&mask);
@@ -41,11 +46,14 @@ void signal_handler_init()
   sa.sa_mask = mask;
   sa.sa_flags = flags;
   sa.sa_handler = signal_handler;
-
-  sigaction(SIGABRT, &sa, NULL);
-  sigaction(SIGSEGV, &sa, NULL);
-  sigaction(SIGBUS, &sa, NULL);
-
+  for (int sig_no = 0; sig_no < 31; sig_no++)
+  {
+    if (sigismember(&sigSet, sig_no))
+    {
+      cout << "add signal " << sig_no << " to list" << endl;
+      sigaction(sig_no, &sa, NULL);
+    }
+  }
 }
 
 
