@@ -34,7 +34,9 @@ void signal_handler(int sig)
 
 void signal_handler_init()
 {
-  sigset_t sigSet;
+  sigset_t sigSet, sigSetOld;
+  sigemptyset(&sigSet);
+  sigemptyset(&sigSetOld);
   sigaddset(&sigSet, SIGABRT);
   sigaddset(&sigSet, SIGSEGV);
   sigaddset(&sigSet, SIGBUS);
@@ -46,6 +48,8 @@ void signal_handler_init()
   sa.sa_mask = mask;
   sa.sa_flags = flags;
   sa.sa_handler = signal_handler;
+  
+  pthread_sigmask(SIG_SETMASK, &mask, &sigSetOld); // block all signals
   for (int sig_no = 0; sig_no < 31; sig_no++)
   {
     if (sigismember(&sigSet, sig_no))
@@ -74,7 +78,7 @@ void* start_thread2(void* arg)
 {
   sleep(1);
   cout << "start_thread2 enter" << endl;
-  sleep(10);
+  sleep(100);
   cout << "start_thread2 exit" << endl;
 }
 
@@ -90,7 +94,10 @@ int main()
     pthread_t thread_id;
     pthread_create(&thread_id, NULL, start_thread1, NULL);
     pthread_create(&thread_id, NULL, start_thread2, NULL);
-    sleep(1000);
+    //sleep(1000);
+    cout << getpid() << " main thread quit" << endl;
+    pthread_exit(NULL); //just thread quit
+    return 0; //main will call exit to quit whole process
   }
   else
   {
