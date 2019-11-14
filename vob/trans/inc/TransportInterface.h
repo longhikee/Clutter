@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <poll.h>
 
 #include "IpAddress.h"
 
@@ -16,6 +17,7 @@
 //define log
 #include <iostream>
 #define Log(x) std::cout << x << std::endl;
+//#define Log(x) 
 //end define log
 
 using std::vector;
@@ -32,6 +34,7 @@ enum reErrId
 class TransportInterface
 {
 public:
+    TransportInterface(const int& fd);
     TransportInterface(const int& fd, const IpAddress& localAddr);
     TransportInterface(const IpAddress& localAddr);
     TransportInterface(const IpAddress& localAddr, const IpAddress& remoteAddr);

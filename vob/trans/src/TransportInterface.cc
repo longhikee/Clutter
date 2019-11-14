@@ -3,6 +3,11 @@
 
 #define POLL_TIME_OUT 600000
 
+TransportInterface::TransportInterface(const int& fd) :
+    sockfd(fd)
+{
+}
+
 TransportInterface::TransportInterface(const int& fd, const IpAddress& localAddr) :
     sockfd(fd),
     localAddress(localAddr)
