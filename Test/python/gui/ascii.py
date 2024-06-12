@@ -128,137 +128,139 @@ asc = [('null', '0', '0'),
        ('}', '125', '7D'),
        ('~', '126', '7E'),
        ('DEL', '127', '7F')
-      ]
+       ]
+
 
 class Ascii:
-  def __init__(self):
-    self.master = Tk()
-    self.sw = self.master.winfo_screenwidth() #screen width
-    self.sh = self.master.winfo_screenheight() #screen height
-    x = (self.sw - 300) / 2
-    y = (self.sh - 200) / 2
-    #window centralized
-    self.master.geometry("%dx%d+%d+%d" % (300, 200, x, y))
-    self.master.title('ASCII')
+    def __init__(self):
+        self.top = None
+        self.master = Tk()
+        self.sw = self.master.winfo_screenwidth()  # screen width
+        self.sh = self.master.winfo_screenheight()  # screen height
+        x = (self.sw - 300) / 2
+        y = (self.sh - 200) / 2
+        # window centralized
+        self.master.geometry("%dx%d+%d+%d" % (300, 200, x, y))
+        self.master.title('ASCII')
 
-    self.frm = Frame(self.master)
-    #top
-    Label(self.master, text='Ascii Query', font=('Arial', 15)).pack()
+        self.frm = Frame(self.master)
+        # top
+        Label(self.master, text='Ascii Query', font=('Arial', 15)).pack()
 
-    #left
-    self.var_L = StringVar()
-    self.frm_L = Frame(self.frm)
-    Label(self.frm_L, text = 'Charactor', font=('Arial', 12)).pack()
-    self.e_L = Entry(self.frm_L, textvariable=self.var_L, width=5, font=('Verdana', 15))
+        # left
+        self.var_L = StringVar()
+        self.frm_L = Frame(self.frm)
+        Label(self.frm_L, text='Character', font=('Arial', 12)).pack()
+        self.e_L = Entry(self.frm_L, textvariable=self.var_L, width=5, font=('Verdana', 15))
 
-    #middle
-    self.var_M = StringVar()
-    self.frm_M = Frame(self.frm)
-    Label(self.frm_M, text = 'Dec', font=('Arial', 12)).pack()
-    self.e_M = Entry(self.frm_M, textvariable=self.var_M, width=5, font=('Verdana', 15))
+        # middle
+        self.var_M = StringVar()
+        self.frm_M = Frame(self.frm)
+        Label(self.frm_M, text='Dec', font=('Arial', 12)).pack()
+        self.e_M = Entry(self.frm_M, textvariable=self.var_M, width=5, font=('Verdana', 15))
 
-    #right
-    self.var_R = StringVar()
-    self.frm_R = Frame(self.frm)
-    Label(self.frm_R, text = 'Hex', font=('Arial', 12)).pack()
-    self.e_R = Entry(self.frm_R, textvariable=self.var_R, width=5, font=('Verdana', 15))
+        # right
+        self.var_R = StringVar()
+        self.frm_R = Frame(self.frm)
+        Label(self.frm_R, text='Hex', font=('Arial', 12)).pack()
+        self.e_R = Entry(self.frm_R, textvariable=self.var_R, width=5, font=('Verdana', 15))
 
-    #bottom
-    self.frm_B = Frame(self.master)
-    Button(self.frm_B, text='clear', command=self.clear, width=6, height=1, font=('Arial', 10)).pack(side=LEFT)
-    Button(self.frm_B, text='query', command=self.query, width=6, height=1, font=('Arial', 10)).pack(side=RIGHT)
-    #bind hot key
-    self.master.bind("<Return>", self.enter_event)
-    self.master.bind("<BackSpace>", self.back_event)
+        # bottom
+        self.frm_B = Frame(self.master)
+        Button(self.frm_B, text='clear', command=self.clear, width=6, height=1, font=('Arial', 10)).pack(side=LEFT)
+        Button(self.frm_B, text='query', command=self.query, width=6, height=1, font=('Arial', 10)).pack(side=RIGHT)
+        # bind hot key
+        self.master.bind("<Return>", self.enter_event)
+        self.master.bind("<BackSpace>", self.back_event)
 
-   
+        self.frm.pack()
+        self.frm_L.pack(side=LEFT)
+        self.frm_R.pack(side=RIGHT)
+        self.frm_M.pack(side=RIGHT)
+        self.frm_B.pack(side=BOTTOM)
+        #    self.frm_B.pack(anchor=CENTER)
+        self.e_L.pack()
+        self.e_M.pack()
+        self.e_R.pack()
 
-    self.frm.pack()
-    self.frm_L.pack(side=LEFT)
-    self.frm_R.pack(side=RIGHT)
-    self.frm_M.pack(side=RIGHT)
-    self.frm_B.pack(side=BOTTOM)
-#    self.frm_B.pack(anchor=CENTER)
-    self.e_L.pack()
-    self.e_M.pack()
-    self.e_R.pack()
+    def back_event(self, event):
+        if self.e_L['state'] == 'readonly':
+            self.clear()
 
-  def back_event(self, evnet):
-    if self.e_L['state'] == 'readonly' :
-      self.clear()
+    def clear(self):
+        self.var_L.set('')
+        self.var_M.set('')
+        self.var_R.set('')
+        self.e_L['state'] = 'normal'
+        self.e_M['state'] = 'normal'
+        self.e_R['state'] = 'normal'
 
-  def clear(self):
-    self.var_L.set('')
-    self.var_M.set('')
-    self.var_R.set('')
-    self.e_L['state'] = 'normal'
-    self.e_M['state'] = 'normal'
-    self.e_R['state'] = 'normal'
+    def enter_event(self, event):
+        if self.e_L['state'] != 'readonly':
+            self.query()
 
-  def enter_event(self, event):
-    if self.e_L['state'] != 'readonly' :
-      self.query()
+    def query(self):
+        self.e_L['state'] = 'readonly'
+        self.e_M['state'] = 'readonly'
+        self.e_R['state'] = 'readonly'
+        (l, m, r) = self.translate()
+        if (l, m, r) == ('nul', 'nul', 'nul'):
+            self.clear()
+        else:
+            self.var_L.set(l)
+            self.var_M.set(m)
+            self.var_R.set(r)
 
-  def query(self):
-    self.e_L['state'] = 'readonly'
-    self.e_M['state'] = 'readonly'
-    self.e_R['state'] = 'readonly'
-    (l, m, r) = self.translate()
-    if (l, m, r) == ('nul', 'nul', 'nul') :
-      self.clear()
-    else :
-      self.var_L.set(l)
-      self.var_M.set(m)
-      self.var_R.set(r)
+    def translate(self):
+        left = self.var_L.get()
+        r = self.var_R.get()
+        m = self.var_M.get()
+        if left == '' and m == '' and r == '':
+            # print('all input is empty')
+            return 'nul', 'nul', 'nul'
+        elif left != '':
+            return self.search(left, 0)
 
-  def translate(self):
-    l = self.var_L.get()
-    r = self.var_R.get()
-    m = self.var_M.get()
-    if l == '' and m == '' and r == '' :
-      #print('all input is empty')
-      return ('nul', 'nul', 'nul')
-    elif l != '' :
-      return self.search(l, 0)
+        elif m != '':
+            return self.search(m, 1)
 
-    elif m != '' :
-      return self.search(m, 1)
+        elif r != '':
+            return self.search(r, 2)
 
-    elif r != '' :
-      return self.search(r, 2)
+    def search(self, key, pos):
+        for s in asc:
+            if s[pos] == key:
+                return s
+        err = ''
+        if pos == 0:
+            err = 'character ' + key
+        elif pos == 1:
+            err = 'Oct ' + key
+        elif pos == 2:
+            err = 'Hex ' + key
+        self.errorbox(err)
+        return '', '', ''
 
-  def search(self, key, pos):
-    for s in asc :
-      if s[pos] == key :
-        return s
-    
-    if pos == 0:
-      err = 'charactor ' + key
-    elif pos == 1:
-      err = 'Oct ' + key
-    elif pos == 2:
-      err = 'Hex ' + key
-    self.errMsgBox(err)
-    return ('', '', '')
+    def close(self):
+        self.top.destroy()
 
-  def close(self):
-    self.top.destroy()
-    
-  def errMsgBox(self, err):
-    self.clear()
-    self.top = Toplevel()
-    lb = Label(self.top, text=err + ' is invalid', font=('Arial', 15))
-    self.top.title("Error")
-    x = (self.sw - 300) / 2 + 100
-    y = (self.sh - 80) /2 - 200
-    self.top.geometry('300x80+%d+%d' % (x, y))
-    lb.pack()
-    Button(self.top, text='close', command=self.close).pack()
-    self.master.after(5000,self.top.destroy)  #close top after 5 second automatically
+    def errorbox(self, err):
+        self.clear()
+        self.top = Toplevel()
+        lb = Label(self.top, text=err + ' is invalid', font=('Arial', 15))
+        self.top.title("Error")
+        x = (self.sw - 300) / 2 + 100
+        y = (self.sh - 80) / 2 - 200
+        self.top.geometry('300x80+%d+%d' % (x, y))
+        lb.pack()
+        Button(self.top, text='close', command=self.close).pack()
+        self.master.after(5000, self.top.destroy)  # close top after 5 second automatically
+
 
 def main():
-  asc = Ascii()
-  mainloop()
+    Ascii()
+    mainloop()
+
 
 if __name__ == "__main__":
-  main()
+    main()
