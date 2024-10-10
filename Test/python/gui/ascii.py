@@ -133,20 +133,34 @@ asc = [('null', '0', '0'),
 
 class Ascii:
     def __init__(self):
-        self.top = None
+        self.err_box = None
+        self.widget_on_top = False
         self.master = Tk()
-        self.sw = self.master.winfo_screenwidth()  # screen width
-        self.sh = self.master.winfo_screenheight()  # screen height
-        x = (self.sw - 300) / 2
-        y = (self.sh - 200) / 2
+
+        #mainwindow 
+        width = self.master.winfo_screenwidth()  # screen width
+        height = self.master.winfo_screenheight()  # screen height
+        x = (width - 300) / 2
+        y = (height - 200) / 2
         # window centralized
         self.master.geometry("%dx%d+%d+%d" % (300, 200, x, y))
+        self.master.resizable(0,0)
         self.master.title('ASCII')
+        #self.master.attributes("-toolwindow", 1)
 
-        self.frm = Frame(self.master)
+        #mouse right click menu
+        #self.menu = Menu(self.master)  there will be a "-----" on the top
+        self.menu = Menu(self.master, tearoff=0)
+        self.menu.add_command(label = 'always on top', command=self.always_on_top)
+       
+        def pop_menu(event):
+            self.menu.post(event.x_root, event.y_root)
+        self.master.bind('<Button-3>', pop_menu)
+
         # top
         Label(self.master, text='Ascii Query', font=('Arial', 15)).pack()
 
+        self.frm = Frame(self.master)
         # left
         self.var_L = StringVar()
         self.frm_L = Frame(self.frm)
@@ -167,8 +181,17 @@ class Ascii:
 
         # bottom
         self.frm_B = Frame(self.master)
-        Button(self.frm_B, text='clear', command=self.clear, width=6, height=1, font=('Arial', 10)).pack(side=LEFT)
-        Button(self.frm_B, text='query', command=self.query, width=6, height=1, font=('Arial', 10)).pack(side=RIGHT)
+        self.clr_btn = Button(self.frm_B, text='clear', command=self.clear, width=6, height=1, font=('Arial', 10))
+        self.qry_btn = Button(self.frm_B, text='query', command=self.query, width=6, height=1, font=('Arial', 10))
+
+        #print(self.clr_btn.cget('bg'))
+        # bind button event
+        self.clr_btn.bind("<FocusIn>", lambda evt: self.clr_btn.configure(bg = 'gray'))
+        self.qry_btn.bind("<FocusIn>", lambda evt: self.qry_btn.configure(bg = 'gray'))
+        self.clr_btn.bind("<FocusOut>", lambda evt: self.clr_btn.configure(bg = 'SystemButtonFace'))
+        self.qry_btn.bind("<FocusOut>", lambda evt: self.qry_btn.configure(bg = 'SystemButtonFace'))
+        #Button(self.master, text='pin_top', command=self.pin_top, width=1, height=1, font=('Arial', 10)).pack(side=TOP)
+
         # bind hot key
         self.master.bind("<Return>", self.enter_event)
         self.master.bind("<BackSpace>", self.back_event)
@@ -178,10 +201,15 @@ class Ascii:
         self.frm_R.pack(side=RIGHT)
         self.frm_M.pack(side=RIGHT)
         self.frm_B.pack(side=BOTTOM)
-        #    self.frm_B.pack(anchor=CENTER)
+
         self.e_L.pack()
         self.e_M.pack()
         self.e_R.pack()
+
+        self.clr_btn.pack(side=LEFT)
+        self.qry_btn.pack(side=RIGHT)
+
+        self.master.mainloop()
 
     def back_event(self, event):
         if self.e_L['state'] == 'readonly':
@@ -203,9 +231,9 @@ class Ascii:
         self.e_L['state'] = 'readonly'
         self.e_M['state'] = 'readonly'
         self.e_R['state'] = 'readonly'
-        (l, m, r) = self.translate()
-        if (l, m, r) == ('nul', 'nul', 'nul'):
-            self.clear()
+        (l, m, r), err = self.translate()
+        if err != '':
+            self.error_msg(err)
         else:
             self.var_L.set(l)
             self.var_M.set(m)
@@ -213,11 +241,12 @@ class Ascii:
 
     def translate(self):
         left = self.var_L.get()
-        r = self.var_R.get()
+        r = self.var_R.get().upper()
         m = self.var_M.get()
         if left == '' and m == '' and r == '':
             # print('all input is empty')
-            return 'nul', 'nul', 'nul'
+            self.clear()
+            return ('', '', '') , ''
         elif left != '':
             return self.search(left, 0)
 
@@ -228,39 +257,48 @@ class Ascii:
             return self.search(r, 2)
 
     def search(self, key, pos):
+        err = ''
         for s in asc:
             if s[pos] == key:
-                return s
-        err = ''
+                return s, err
+
         if pos == 0:
             err = 'character ' + key
         elif pos == 1:
             err = 'Oct ' + key
         elif pos == 2:
             err = 'Hex ' + key
-        self.errorbox(err)
-        return '', '', ''
+        return ('nul', 'nul', 'nul'), err
 
-    def close(self):
-        self.top.destroy()
-
-    def errorbox(self, err):
+    def close_err_box(self):
+        self.err_box.destroy()
         self.clear()
-        self.top = Toplevel()
-        lb = Label(self.top, text=err + ' is invalid', font=('Arial', 15))
-        self.top.title("Error")
-        x = (self.sw - 300) / 2 + 100
-        y = (self.sh - 80) / 2 - 200
-        self.top.geometry('300x80+%d+%d' % (x, y))
-        lb.pack()
-        Button(self.top, text='close', command=self.close).pack()
-        self.master.after(5000, self.top.destroy)  # close top after 5 second automatically
 
+    def error_msg(self, err):
+        #self.clear()
+        self.err_box = Toplevel()
+        lb = Label(self.err_box, text=err + ' is invalid', font=('Arial', 15))
+        self.err_box.title("Error")
+        x = self.master.winfo_x() + 20
+        y = self.master.winfo_y() - 120
+        self.err_box.geometry('300x80+%d+%d' % (x, y))
+        lb.pack()
+        Button(self.err_box, text='close', command=self.close_err_box).pack(side=BOTTOM)
+        #self.master.after(5000, self.err_box.destroy)  # close top after 5 second automatically
+        self.master.after(5000, self.close_err_box)
+    def always_on_top(self):
+        if not self.widget_on_top:
+            self.master.attributes('-topmost', 'true')
+            self.menu.entryconfig(0, label='√ always on top')
+            self.widget_on_top = True
+        else:
+            self.master.attributes('-topmost', 'false')
+            self.menu.entryconfig(0, label='always on top')
+            self.widget_on_top = False
 
 def main():
     Ascii()
-    mainloop()
-
+    #mainloop()
 
 if __name__ == "__main__":
     main()
